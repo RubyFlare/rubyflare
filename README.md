@@ -16,7 +16,7 @@ Join us at **RubyFlare** and witness the remarkable synergy of Ruby and Flutter 
 
 ```ruby
 component_code = FlutterComponentGenerator.generate_component('MyWidget') do
-  container do
+  container.indent(2).padding(5) do
     text 'Hello, World!'
   end
 end
