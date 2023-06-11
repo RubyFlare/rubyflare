@@ -1,25 +1,21 @@
 # lib/flutter_component_generator.rb
 class FlutterComponentGenerator
   def self.generate_component(name, &block)
+    component_builder = FlutterComponentBuilder.new
+    component_builder.instance_eval(&block)
+
     component_code = <<~FLUTTER_CODE
       import 'package:flutter/material.dart';
 
       class #{name} extends StatelessWidget {
         @override
         Widget build(BuildContext context) {
-          return #{build_component(&block).indent(2)}
+          return #{component_builder.build_component}
         }
       }
     FLUTTER_CODE
 
     component_code
-  end
-
-  def self.build_component(&block)
-    component_builder = FlutterComponentBuilder.new
-    component_builder.instance_eval(&block)
-
-    component_builder.component_code
   end
 
   class FlutterComponentBuilder
@@ -29,31 +25,33 @@ class FlutterComponentGenerator
       @component_code = ''
     end
 
-    def component(name, &block)
-      component_code << FlutterComponentGenerator.build_component(name, &block)
+    def build_component
+      component_code
     end
 
-    def container(&block)
-      component_code << <<~FLUTTER_CODE
-        Container(
-          #{build_widget(&block).indent(2)}
-        ),
-      FLUTTER_CODE
+    def method_missing(method_name, *args, &block)
+      component_code << format_code_line(method_name, args, &block)
     end
 
-    def text(text)
-      component_code << <<~FLUTTER_CODE
-        Text(
-          '#{text}',
-        ),
-      FLUTTER_CODE
-    end
+    def format_code_line(method_name, args, &block)
+      code_line = "#{method_name}("
 
-    def build_widget(&block)
-      widget_builder = FlutterComponentBuilder.new
-      widget_builder.instance_eval(&block)
+      args.each_with_index do |arg, index|
+        code_line << "#{arg.inspect}"
+        code_line << ', ' if index < args.size - 1
+      end
 
-      widget_builder.component_code
+      code_line << ")"
+
+      if block_given?
+        nested_builder = FlutterComponentBuilder.new
+        nested_builder.instance_eval(&block)
+        code_line << " { #{nested_builder.build_component} }"
+      end
+
+      code_line << ','
+
+      code_line
     end
   end
 end
