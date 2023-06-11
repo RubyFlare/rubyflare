@@ -15,9 +15,12 @@ Join us at **RubyFlare** and witness the remarkable synergy of Ruby and Flutter 
 ## Usage Example
 
 ```ruby
-login_component = ComponentGenerator.stateful('MyWidget') do
+component_code = FlutterComponentGenerator.generate_component('MyWidget') do
   container do
     text 'Hello, World!'
   end
 end
+
+# Output the generated Flutter code
+puts component_code
 ```
