@@ -16,8 +16,21 @@ Join us at **RubyFlare** and witness the remarkable synergy of Ruby and Flutter 
 
 ```ruby
 component_code = FlutterComponentGenerator.generate_component('MyWidget') do
-  container.indent(2).padding(5) do
-    text 'Hello, World!'
+  initializer do
+    <<~FLUTTER_CODE
+      String _text = 'Hello';
+
+      void _changeText() {
+        setState(() {
+          _text = 'Flutter';
+        });
+      }
+    FLUTTER_CODE
+  end
+
+  container do
+    text _text.downcase.capitalize
+    raised_button('Change Text').on_pressed(_changeText)
   end
 end
 
